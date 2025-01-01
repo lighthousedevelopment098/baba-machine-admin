@@ -134,43 +134,45 @@
 // export default React.memo(CategoryForm);
 
 
-
 import React, { useCallback, useRef, useState } from "react";
-import { MdDelete, MdDeleteOutline } from "react-icons/md";
+import { MdDeleteOutline } from "react-icons/md";
 
 const CategoryForm = ({
   selectedLang,
   newCategory,
   onInputChange,
-  onFileChange,
   onSubmit,
   setSelectedFile,
 }) => {
-  const [preview, setPreview] = useState(null);
+  const [preview, setPreview] = useState(null); // State for image preview
   const fileInputRef = useRef(null); // Reference to the file input element
 
+  // Handle file selection
   const handleFileChange = useCallback(
     (e) => {
       const file = e.target.files[0];
       if (file) {
-        setSelectedFile(file);
-        const objectUrl = URL.createObjectURL(file);
-        setPreview(objectUrl);
+        setSelectedFile(file); // Set selected file
+        const objectUrl = URL.createObjectURL(file); // Generate preview URL
+        setPreview(objectUrl); // Set preview URL
       } else {
         setPreview(null);
-        onFileChange(""); // Reset if no file is selected
+        setSelectedFile(null); // Reset if no file selected
       }
     },
-    [onFileChange, setSelectedFile]
+    [setSelectedFile]
   );
 
+  // Handle image box click to open file picker
   const handleImageBoxClick = () => {
     if (fileInputRef.current) {
-      fileInputRef.current.click(); // Programmatically trigger the file input click
+      fileInputRef.current.click(); // Trigger file input click
     }
   };
 
-  const handleDeleteImage = () => {
+  // Handle image deletion
+  const handleDeleteImage = (e) => {
+    e.stopPropagation(); // Prevent triggering file input click
     setPreview(null); // Clear the preview
     setSelectedFile(null); // Reset the selected file
     if (fileInputRef.current) {
@@ -180,17 +182,13 @@ const CategoryForm = ({
 
   return (
     <div className="card p-6 shadow-lg rounded-md bg-white">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">
-        Add New Category
-      </h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Category</h2>
       <form onSubmit={onSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             {["en", "sa", "bd", "in"].map((lang) => (
               <div
-                className={`form-group ${
-                  selectedLang === lang ? "" : "hidden"
-                }`}
+                className={`form-group ${selectedLang === lang ? "" : "hidden"}`}
                 key={lang}
                 id={`${lang}-form`}
               >
@@ -211,34 +209,30 @@ const CategoryForm = ({
             ))}
           </div>
 
+          {/* Image Preview Box */}
           <div className="relative flex items-center justify-center">
-            {/* Image Box */}
             <div
               className="w-full h-40 md:h-56 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer relative"
               onClick={handleImageBoxClick} // Open file manager on click
             >
-              {/* Image Preview */}
-              <img
-                className="h-full object-contain"
-                id="viewer"
-                alt="Category Preview"
-                src={
-                  preview ||
-                  "https://via.placeholder.com/500x500?text=Image+Placeholder"
-                }
-              />
+              {preview ? (
+                <img
+                  src={preview}
+                  alt="Preview"
+                  className="h-full object-contain"
+                />
+              ) : (
+                <span className="text-gray-500">+ Upload image </span>
+              )}
+
               {/* Delete Icon */}
               {preview && (
                 <button
                   type="button"
                   className="absolute top-2 right-2 bg-red-500 text-white rounded-md p-1 shadow-md hover:bg-red-600"
-                  onClick={(e) => {
-                    e.stopPropagation(); // Prevent triggering the file input click
-                    handleDeleteImage();
-                  }}
+                  onClick={handleDeleteImage} // Handle image deletion
                 >
                   <MdDeleteOutline />
-                  
                 </button>
               )}
             </div>
@@ -251,18 +245,18 @@ const CategoryForm = ({
               id="category-image"
               className="hidden"
               accept="image/*"
-              required
-              onChange={handleFileChange}
+              onChange={handleFileChange} // Handle file selection
             />
           </div>
         </div>
 
+        {/* Form Actions */}
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="reset"
             id="reset"
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-            onClick={() => handleDeleteImage()} // Clear preview on reset
+            onClick={handleDeleteImage} // Clear preview on reset
           >
             Reset
           </button>
