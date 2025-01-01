@@ -124,6 +124,8 @@ import UpdateVendor from "./pages/seller/vendor/add/addVender/UpdateVendor.jsx";
 import UpdateEmployeeRole from "./pages/admin/employees/add/updateEmployeRole.jsx";
 import VendorWalletDetail from "./pages/seller/vendor/list/VenderWallet/VendorWalletDetail.jsx";
 import AddPickupAddress from "./components/SonicShipping/AddPickupAddress.jsx";
+import ManufacturingForm from "./components/Manufacture/AddManufacturing.jsx";
+
 
 function AllRoutes() {
   return (
@@ -263,6 +265,11 @@ function AllRoutes() {
           element={<WithdrawalMethods />}
         />
         {/* <Route path="*" element={<NotFoundPage />} /> */}
+
+        <Route
+          path="/ManufacturingForm"
+          element={<ManufacturingForm />}
+        />
       </Routes>
     </>
   );

@@ -103,14 +103,14 @@ export const sidebarItems = [
       { title: "List", link: "/brandlist" },
     ],
   },
-  // {
-  //   title: "Product Attribute Setup",
-  //   key:"product-attribute",
+  {
+    title: "Product Attribute Setup",
+    key:"product-attribute",
 
-  //   icon: <FaNetworkWired />,
-  //   link: "/productattributesetup",
-  //   isDropdown: false,
-  // },
+    icon: <FaNetworkWired />,
+    link: "/ManufacturingForm",
+    isDropdown: false,
+  },
   {
     title: "Services",
     key: "inhouse-product",
@@ -168,6 +168,7 @@ export const sidebarItems = [
     link: "/bannersetup",
     isDropdown: false,
   },
+ 
 
   // {
   //   title: "Offers & Deals",
