@@ -283,6 +283,7 @@ import {
   getUploadUrl,
   uploadImageToS3,
 } from "../../../../../../../utils/helpers";
+import { MdDeleteOutline } from "react-icons/md";
 
 const ApiUrl = `${apiConfig.admin}`; // Use admin role
 
@@ -337,6 +338,13 @@ const CategoryUpdate = () => {
       const fileUrl = URL.createObjectURL(file);
       setPreviewUrl(fileUrl);
     }
+  };
+
+  // Handle image deletion
+  const handleDeleteImage = (e) => {
+    e.stopPropagation(); // Prevent triggering file picker
+    setSelectedFile(null); // Remove the selected file
+    setPreviewUrl(""); // Remove the preview image
   };
 
   const handleSubmit = async (e) => {
@@ -404,12 +412,15 @@ const CategoryUpdate = () => {
             <div className="card-body">
               <form onSubmit={handleSubmit}>
                 <ul className="nav nav-tabs mb-4">
-                  {[
-                    { code: "en", label: "English (EN)" },
-                    { code: "sa", label: "Arabic (SA)" },
-                    { code: "bd", label: "Bangla (BD)" },
-                    { code: "in", label: "Hindi (IN)" },
-                  ].map((lang) => (
+                  {[{
+                    code: "en", label: "English (EN)"
+                  }, {
+                    code: "sa", label: "Arabic (SA)"
+                  }, {
+                    code: "bd", label: "Bangla (BD)"
+                  }, {
+                    code: "in", label: "Hindi (IN)"
+                  }].map((lang) => (
                     <li key={lang.code} className="nav-item">
                       <span
                         className={`nav-link cursor-pointer text-capitalize ${
@@ -428,6 +439,7 @@ const CategoryUpdate = () => {
                   onInputChange={handleInputChange}
                   onFileChange={handleFileChange}
                   previewUrl={previewUrl} // Pass previewUrl to CategoryForm
+                  onDeleteImage={handleDeleteImage} // Pass the delete handler
                 />
               </form>
             </div>
@@ -444,16 +456,20 @@ const CategoryForm = ({
   onInputChange,
   onFileChange,
   previewUrl, // Accept previewUrl as a prop
+  onDeleteImage, // Accept onDeleteImage handler as a prop
 }) => {
   return (
     <div className="row">
       <div className="col-lg-6">
-        {[
-          { code: "en", label: "English (EN)" },
-          { code: "sa", label: "Arabic (SA)" },
-          { code: "bd", label: "Bangla (BD)" },
-          { code: "in", label: "Hindi (IN)" },
-        ].map((lang) => (
+        {[{
+          code: "en", label: "English (EN)"
+        }, {
+          code: "sa", label: "Arabic (SA)"
+        }, {
+          code: "bd", label: "Bangla (BD)"
+        }, {
+          code: "in", label: "Hindi (IN)"
+        }].map((lang) => (
           <div
             key={lang.code}
             className={`form-group ${selectedLang === lang.code ? "" : "d-none"}`}
@@ -477,26 +493,65 @@ const CategoryForm = ({
           <span className="text-info d-block">
             <span className="text-danger">*</span> Ratio 1:1 (500 x 500 px)
           </span>
-          <div className="custom-file">
+          <div
+            className="position-relative d-flex justify-content-center align-items-center"
+            style={{
+              width: "300px",
+              height: "300px",
+              border: "1px dashed #ccc",
+              borderRadius: "8px",
+              cursor: "pointer",
+            }}
+            onClick={() => document.getElementById("file-input").click()} // Trigger file input
+          >
+            {/* Delete Button */}
+            {previewUrl && (
+              <button
+                type="button"
+                className="position-absolute"
+                style={{
+                  top: "10px",
+                  right: "10px",
+                  backgroundColor: "red",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "50%",
+                  width: "30px",
+                  height: "30px",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  cursor: "pointer",
+                }}
+                onClick={onDeleteImage} // Call the delete handler
+              >
+                <MdDeleteOutline />
+              </button>
+            )}
+
+            {/* Image Preview */}
+            <img
+              className="img-thumbnail"
+              src={previewUrl || `${apiConfig.bucket}/image-place-holder.png`} // Fallback image
+              alt="Category Logo"
+              style={{
+                maxWidth: "100%",
+                maxHeight: "100%",
+                objectFit: "cover",
+                borderRadius: "8px",
+              }}
+            />
+
+            {/* Hidden File Input */}
             <input
               type="file"
-              name="logo"
-              className="custom-file-input"
+              id="file-input"
+              className="d-none"
               accept="image/*"
-              onChange={onFileChange}
+              onChange={onFileChange} // Handles image selection
             />
-            <label className="custom-file-label">Choose File</label>
           </div>
         </div>
-      </div>
-      <div className="col-lg-6 d-flex justify-content-center align-items-center">
-        <img
-          className="img-thumbnail"
-          src={previewUrl || `${apiConfig.bucket}/image-place-holder.png`}
-          alt="Category Logo"
-          width="300"
-          height="300"
-        />
       </div>
       <div className="col-12 mt-4 d-flex justify-content-end">
         <button type="submit" className="btn btn-primary px-4 py-2 bg-primary-500 hover:bg-primary-dark-500 shadow-lg " style={{color:"white"}}>
@@ -508,4 +563,6 @@ const CategoryForm = ({
 };
 
 export default CategoryUpdate;
+
+
 

@@ -135,8 +135,8 @@
 
 
 
-
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
+import { MdDelete, MdDeleteOutline } from "react-icons/md";
 
 const CategoryForm = ({
   selectedLang,
@@ -147,6 +147,7 @@ const CategoryForm = ({
   setSelectedFile,
 }) => {
   const [preview, setPreview] = useState(null);
+  const fileInputRef = useRef(null); // Reference to the file input element
 
   const handleFileChange = useCallback(
     (e) => {
@@ -162,6 +163,20 @@ const CategoryForm = ({
     },
     [onFileChange, setSelectedFile]
   );
+
+  const handleImageBoxClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Programmatically trigger the file input click
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setPreview(null); // Clear the preview
+    setSelectedFile(null); // Reset the selected file
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input value
+    }
+  };
 
   return (
     <div className="card p-6 shadow-lg rounded-md bg-white">
@@ -194,30 +209,15 @@ const CategoryForm = ({
                 />
               </div>
             ))}
-
-            <div className="form-group mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category Logo <span className="text-red-500">*</span>
-              </label>
-              <span className="block text-xs text-gray-500 mb-2">
-                Recommended: 1:1 ratio, 500x500 px
-              </span>
-              <div className="relative">
-                <input
-                  type="file"
-                  name="logo"
-                  id="category-image"
-                  className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-dark-500"
-                  accept="image/*"
-                  required
-                  onChange={handleFileChange}
-                />
-              </div>
-            </div>
           </div>
 
-          <div className="flex items-center justify-center">
-            <div className="w-full h-40 md:h-56 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
+          <div className="relative flex items-center justify-center">
+            {/* Image Box */}
+            <div
+              className="w-full h-40 md:h-56 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center bg-gray-50 cursor-pointer relative"
+              onClick={handleImageBoxClick} // Open file manager on click
+            >
+              {/* Image Preview */}
               <img
                 className="h-full object-contain"
                 id="viewer"
@@ -227,7 +227,33 @@ const CategoryForm = ({
                   "https://via.placeholder.com/500x500?text=Image+Placeholder"
                 }
               />
+              {/* Delete Icon */}
+              {preview && (
+                <button
+                  type="button"
+                  className="absolute top-2 right-2 bg-red-500 text-white rounded-md p-1 shadow-md hover:bg-red-600"
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent triggering the file input click
+                    handleDeleteImage();
+                  }}
+                >
+                  <MdDeleteOutline />
+                  
+                </button>
+              )}
             </div>
+
+            {/* Hidden file input */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              name="logo"
+              id="category-image"
+              className="hidden"
+              accept="image/*"
+              required
+              onChange={handleFileChange}
+            />
           </div>
         </div>
 
@@ -236,14 +262,13 @@ const CategoryForm = ({
             type="reset"
             id="reset"
             className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-            onClick={() => setPreview(null)} // Clear preview on reset
+            onClick={() => handleDeleteImage()} // Clear preview on reset
           >
             Reset
           </button>
           <button
             type="submit"
             className="px-4 py-2 bg-primary-500 hover:bg-primary-dark-500 text-white rounded-md"
-            style={{color:"white"}}
           >
             Submit
           </button>
@@ -254,5 +279,6 @@ const CategoryForm = ({
 };
 
 export default React.memo(CategoryForm);
+
 
 

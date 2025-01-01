@@ -271,6 +271,8 @@
 
 // export default AddNewProduct;
 
+
+
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -285,6 +287,7 @@ import { getAuthData } from "../../../../../utils/authHelper";
 import uploadProductImagesToS3 from "./uploadImages";
 import { useNavigate } from "react-router-dom";
 import Uploading from "../../../../../components/LoodingSpinner/Uploading";
+import { MdDeleteOutline } from "react-icons/md";
 
 const API_URL = `${apiConfig.seller}/products`;
 
@@ -304,8 +307,8 @@ const AddNewProduct = () => {
   };
 
   const [formData, setFormData] = useState(initialFormState);
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(""); // For image preview
+  const [images, setImages] = useState([]); // Store multiple images
+  const [previews, setPreviews] = useState([]); // Image previews
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -322,22 +325,25 @@ const AddNewProduct = () => {
   };
 
   const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setPreview(URL.createObjectURL(file)); // Generate a preview URL for the image
-    }
+    const files = Array.from(e.target.files);
+    setImages(files);
+
+    // Generate previews for all selected images
+    const previewUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviews(previewUrls);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
-    let imageKey = null;
-    if (image) {
-      const uploadResult = await uploadProductImagesToS3(image, []);
-      if (uploadResult) {
-        imageKey = uploadResult.thumbnailKey;
+    const uploadedImageKeys = [];
+    if (images.length > 0) {
+      for (const image of images) {
+        const uploadResult = await uploadProductImagesToS3(image, []);
+        if (uploadResult) {
+          uploadedImageKeys.push(uploadResult.thumbnailKey);
+        }
       }
     }
 
@@ -352,7 +358,7 @@ const AddNewProduct = () => {
       const productData = {
         ...formData,
         userId,
-        image: imageKey,
+        images: uploadedImageKeys,
       };
 
       const response = await fetch(API_URL, {
@@ -379,8 +385,8 @@ const AddNewProduct = () => {
       });
 
       setFormData(initialFormState);
-      setImage(null);
-      setPreview(""); // Reset preview
+      setImages([]);
+      setPreviews([]); // Reset previews
     } catch (error) {
       Swal.fire({
         icon: "error",
@@ -397,118 +403,119 @@ const AddNewProduct = () => {
     <div className="p-8 bg-white shadow-lg rounded-lg">
       {loading && <Uploading />}
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Add New Services</h1>
-      <form onSubmit={handleSubmit} className="flex flex-wrap gap-8">
-        {/* Left Section (Fields) */}
-        <div className="flex-1 space-y-6 ">
-          {/* Name */}
-          <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="mt-2 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Serial No */}
-          <div>
-            <label htmlFor="serialNo" className="block text-sm font-medium text-gray-700">
-              Serial No
-            </label>
-            <input
-              type="text"
-              id="serialNo"
-              name="serialNo"
-              value={formData.serialNo}
-              onChange={handleChange}
-              className="mt-2 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Year */}
-          <div>
-            <label htmlFor="year" className="block text-sm font-medium text-gray-700">
-              Year
-            </label>
-            <input
-              type="text"
-              id="year"
-              name="year"
-              value={formData.year}
-              onChange={handleChange}
-              className="mt-2 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Hour */}
-          <div>
-            <label htmlFor="hour" className="block text-sm font-medium text-gray-700">
-              Hour
-            </label>
-            <input
-              type="text"
-              id="hour"
-              name="hour"
-              value={formData.hour}
-              onChange={handleChange}
-              className="mt-2 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Price */}
-          <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-              Price
-            </label>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              value={formData.price}
-              onChange={handleChange}
-              className="mt-2 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-            />
-          </div>
-        </div>
-
-        {/* Right Section (Image with Preview) */}
-        <div className="w-1/3 space-y-4">
-         
-        
-          <div className="flex items-center justify-center">
-            <div className="w-full h-40 md:h-56 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
-              <img
-                className="h-full object-contain"
-                id="viewer"
-                alt="Category Preview"
-                src={
-                  preview ||
-                  "https://via.placeholder.com/500x500?text=Image+Placeholder"
-                }
+      <form onSubmit={handleSubmit} className="grid grid-cols-1  gap-8">
+        {/* Form Fields */}
+        <div className=" grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[
+            { label: "Name", name: "name", type: "text" },
+            { label: "Serial No", name: "serialNo", type: "text" },
+            { label: "Year", name: "year", type: "text" },
+            { label: "Hour", name: "hour", type: "text" },
+            { label: "Price", name: "price", type: "number" },
+          ].map((field) => (
+            <div key={field.name}>
+              <label
+                htmlFor={field.name}
+                className="block text-sm font-medium text-gray-700"
+              >
+                {field.label}
+              </label>
+              <input
+                type={field.type}
+                id={field.name}
+                name={field.name}
+                value={formData[field.name]}
+                onChange={handleChange}
+                className="mt-2 block w-full px-3 py-2 border rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
               />
             </div>
-          </div>
-          <div>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-700"
-            />
-          </div>
+          ))}
         </div>
 
+        {/* Image Upload Section */}
+       {/* Image Upload Section */}
+<div className="space-y-4">
+  <label className="block text-sm font-medium text-gray-700">
+    Upload Images
+  </label>
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+    {previews.map((preview, index) => (
+      <div
+        key={index}
+        className="relative border border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50 h-40 cursor-pointer"
+        onClick={() => document.getElementById(`file-input-${index}`).click()}
+      >
+        <img
+          src={preview}
+          alt={`Preview ${index + 1}`}
+          className="w-full h-full object-cover rounded-md"
+        />
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation(); // Prevent triggering the file manager
+            setImages((prevImages) => prevImages.filter((_, i) => i !== index));
+            setPreviews((prevPreviews) => prevPreviews.filter((_, i) => i !== index));
+          }}
+          className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-md"
+        >
+          <MdDeleteOutline />
+        </button>
+        <input
+          type="file"
+          id={`file-input-${index}`}
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files[0];
+            if (file) {
+              setImages((prevImages) => {
+                const updatedImages = [...prevImages];
+                updatedImages[index] = file;
+                return updatedImages;
+              });
+              setPreviews((prevPreviews) => {
+                const updatedPreviews = [...prevPreviews];
+                updatedPreviews[index] = URL.createObjectURL(file);
+                return updatedPreviews;
+              });
+            }
+          }}
+        />
+      </div>
+    ))}
+    {/* Add New Image Box */}
+    <div
+      className="relative border border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50 h-40 cursor-pointer"
+      onClick={() => document.getElementById(`file-input-new`).click()}
+    >
+      <span className="text-gray-500">+ Add Image</span>
+      <input
+        type="file"
+        id="file-input-new"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (file) {
+            setImages((prevImages) => [...prevImages, file]);
+            setPreviews((prevPreviews) => [
+              ...prevPreviews,
+              URL.createObjectURL(file),
+            ]);
+          }
+        }}
+      />
+    </div>
+  </div>
+</div>
+
+
         {/* Submit Button */}
-        <div className="w-full flex justify-end mt-6">
+        <div className="col-span-full flex justify-end mt-6">
           <button
             type="submit"
             className="bg-primary-500 hover:bg-primary-dark-500 text-white px-6 py-2 rounded shadow"
-            style={{color:"white"}}
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit Service"}
@@ -520,5 +527,6 @@ const AddNewProduct = () => {
 };
 
 export default AddNewProduct;
+
 
 

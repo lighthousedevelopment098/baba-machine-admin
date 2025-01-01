@@ -329,18 +329,15 @@
 // export default AddNewBrand;
 
 
-
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
-import FileUpload from "../../../components/FormInput/FileUpload";
-import PreviewImage from "../../../components/FormInput/PreviewImage";
 
 import { createBrand, fetchBrands } from "../../../redux/slices/admin/brandSlice";
 import { getUploadUrl, uploadImageToS3 } from "../../../utils/helpers";
 import "react-toastify/dist/ReactToastify.css";
-import ActionButton from "../../../components/ActionButton/Action";
+import { MdDeleteOutline } from "react-icons/md";
 
 const AddNewBrand = () => {
   const [brandName, setBrandName] = useState("");
@@ -348,6 +345,7 @@ const AddNewBrand = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
 
+  const fileInputRef = useRef(null); // Reference to file input
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.brand);
@@ -371,6 +369,20 @@ const AddNewBrand = () => {
 
     setSelectedFile(file);
     setImagePreview(URL.createObjectURL(file));
+  };
+
+  const handleImageBoxClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Trigger file input click
+    }
+  };
+
+  const handleDeleteImage = () => {
+    setImagePreview(null);
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear file input value
+    }
   };
 
   const handleBrandNameChange = (e) => {
@@ -448,7 +460,7 @@ const AddNewBrand = () => {
               type="text"
               id="brandName"
               name="brandName"
-              className="mt-1 block w-full px-3 py-2 rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              className="mt-1 block w-full px-3 py-2 border  rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
               placeholder="Enter News Title"
               value={brandName}
               onChange={handleBrandNameChange}
@@ -464,8 +476,8 @@ const AddNewBrand = () => {
               type="text"
               id="imageAltText"
               name="imageAltText"
-              className="mt-1 block px-3 py-2 w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
-              placeholder="Enter image alt text"
+              className="mt-1 block px-3 py-2 w-full border rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm"
+              placeholder="Enter Image Alt Text"
               value={imageAltText}
               onChange={(e) => setImageAltText(e.target.value)}
               required
@@ -473,40 +485,67 @@ const AddNewBrand = () => {
           </div>
         </div>
 
-        {/* Right Section: Logo */}
+        {/* Right Section: Image Box */}
         <div className="flex-1 flex flex-col items-start">
-          
-          {imagePreview ? (
-            <PreviewImage image={imagePreview} altText={imageAltText} />
-          ) : (
-            <div className="mt-2 flex items-center justify-center w-full h-40 border-2 border-dashed border-gray-300 rounded-md">
+          <div
+            className="w-full h-40 md:h-56 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center bg-gray-50 relative cursor-pointer"
+            onClick={handleImageBoxClick}
+          >
+            {/* Image Preview */}
+            {imagePreview ? (
+              <img
+                src={imagePreview}
+                alt={imageAltText || "Preview"}
+                className="h-full object-contain"
+              />
+            ) : (
               <span className="text-gray-500">No image selected</span>
-            </div>
-          )}
-          <FileUpload
+            )}
+
+            {/* Delete Button */}
+            {imagePreview && (
+              <button
+                type="button"
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-md p-1 shadow-md hover:bg-red-600"
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent triggering file input
+                  handleDeleteImage();
+                }}
+              >
+                <MdDeleteOutline />
+              </button>
+            )}
+          </div>
+
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
             name="logo"
-            label=""
+            id="brandLogo"
+            className="hidden"
             accept="image/*"
             onChange={handleImageChange}
           />
         </div>
 
         <div className="w-full flex justify-end gap-4 mt-6">
-  <button
-    type="button"
-    className="bg-gray-500 hover:bg-gray-700 text-white px-4 py-2 rounded"
-    onClick={handleReset}
-    label="Reset"
-  />
-  <button
-    type="submit"
-    className="bg-primary-500 hover:bg-primary-700 text-white px-4 py-2 rounded"
-    label={loading ? "Submitting..." : "Submit"}
-    disabled={loading}
-  />
-</div>
-
-
+          <button
+            type="button"
+            className="bg-gray-200 hover:bg-gray-300 text-white px-4 py-2 rounded"
+            onClick={handleReset}
+          >
+            Reset
+          </button>
+          <button
+            type="submit"
+            className="bg-primary-500 hover:bg-primary-dark-500 text-white px-4 py-2 rounded"
+            style={{color:"white"}}
+            disabled={loading}
+          >
+            {loading ? "Submitting..." : "Submit"}
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -351,6 +351,9 @@
 
 // export default AddBannerForm;
 
+
+
+
 import React, { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
@@ -358,52 +361,91 @@ import "react-toastify/dist/ReactToastify.css";
 import { getUploadUrl, uploadImageToS3 } from "../../../../utils/helpers";
 import apiConfig from "../../../../config/apiConfig";
 import axios from "axios";
+import { MdDeleteOutline } from "react-icons/md";
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB
 const ApiUrl = `${apiConfig.admin}`;
 
-const AddBrandForm = () => {
-  const [brandName, setBrandName] = useState("");
-  const [imageAltText, setImageAltText] = useState("");
-  const [preview, setPreview] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
+const AddBannerForm = () => {
+  const [banners, setBanners] = useState([]); // Store uploaded banners
+  const [previews, setPreviews] = useState([]); // Store previews
+  const [bannerDetails, setBannerDetails] = useState([]); // Store banner names and image texts
   const navigate = useNavigate();
 
-  const handleFileChange = useCallback((e) => {
+  const handleBannerChange = useCallback((e, index) => {
     const file = e.target.files[0];
     if (file && file.size <= MAX_IMAGE_SIZE) {
-      setSelectedFile(file);
       const objectUrl = URL.createObjectURL(file);
-      setPreview(objectUrl);
+      setPreviews((prev) => {
+        const updatedPreviews = [...prev];
+        updatedPreviews[index] = objectUrl;
+        return updatedPreviews;
+      });
+      setBanners((prev) => {
+        const updatedBanners = [...prev];
+        updatedBanners[index] = file;
+        return updatedBanners;
+      });
+      // Ensure there's a corresponding entry for the new banner's details
+      setBannerDetails((prev) => {
+        const updatedDetails = [...prev];
+        if (!updatedDetails[index]) {
+          updatedDetails[index] = { name: "", text: "" };
+        }
+        return updatedDetails;
+      });
     } else {
       toast.error("Image size exceeds 2MB.");
     }
   }, []);
 
+  const handleDetailChange = (index, field, value) => {
+    setBannerDetails((prev) => {
+      const updatedDetails = [...prev];
+      updatedDetails[index] = {
+        ...updatedDetails[index],
+        [field]: value,
+      };
+      return updatedDetails;
+    });
+  };
+
+  const handleBannerDelete = (index) => {
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+    setBanners((prev) => prev.filter((_, i) => i !== index));
+    setBannerDetails((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!selectedFile) {
-      toast.error("Please upload a brand logo.");
+    if (banners.length === 0) {
+      toast.error("Please upload at least one banner image.");
       return;
     }
 
-    const uploadConfig = await getUploadUrl(selectedFile.type, "brands");
-    const imageKey = await uploadImageToS3(uploadConfig.url, selectedFile);
-
-    if (!imageKey) {
-      toast.error("Image upload failed.");
-      return;
+    const uploadedKeys = [];
+    for (const banner of banners) {
+      const uploadConfig = await getUploadUrl(banner.type, "banners");
+      const imageKey = await uploadImageToS3(uploadConfig.url, banner);
+      if (imageKey) {
+        uploadedKeys.push(imageKey);
+      } else {
+        toast.error("Image upload failed.");
+        return;
+      }
     }
 
     const data = {
-      name: brandName,
-      logo: imageKey,
-      imageAltText,
+      banners: uploadedKeys.map((key, index) => ({
+        key,
+        name: bannerDetails[index]?.name || "",
+        text: bannerDetails[index]?.text || "",
+      })),
     };
 
     try {
-      const response = await axios.post(`${ApiUrl}/brands`, data, {
+      const response = await axios.post(`${ApiUrl}/banners`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
           "Content-Type": "application/json",
@@ -411,10 +453,10 @@ const AddBrandForm = () => {
       });
 
       if (response.status === 201) {
-        toast.success("Brand added successfully.");
-        navigate("/brandlist");
+        toast.success("Banners added successfully.");
+        navigate("/bannerlist");
       } else {
-        toast.error("Failed to add brand.");
+        toast.error("Failed to add banners.");
       }
     } catch (error) {
       toast.error("Submission error.");
@@ -424,95 +466,107 @@ const AddBrandForm = () => {
   return (
     <div className="card p-6 shadow-lg rounded-md bg-white">
       <ToastContainer />
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Brand</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Banners</h2>
       <form onSubmit={handleSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <div className="form-group">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Brand Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Enter Brand Name"
-                required
-              />
+          {previews.map((preview, index) => (
+            <div key={index} className="relative p-4 border border-gray-300 rounded-md">
+              <div
+                className="relative border border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50 h-40 cursor-pointer"
+                onClick={() => document.getElementById(`banner-input-${index}`).click()}
+              >
+                <img
+                  src={preview}
+                  alt={`Banner ${index + 1}`}
+                  className="w-full h-full object-cover rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleBannerDelete(index);
+                  }}
+                  className="absolute top-1 right-1 bg-red-500 text-white text-xs px-2 py-1 rounded-md"
+                >
+                  <MdDeleteOutline />
+                </button>
+                <input
+                  type="file"
+                  id={`banner-input-${index}`}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => handleBannerChange(e, index)}
+                />
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Banner Name
+                </label>
+                <input
+                  type="text"
+                  value={bannerDetails[index]?.name || ""}
+                  onChange={(e) =>
+                    handleDetailChange(index, "name", e.target.value)
+                  }
+                  className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Enter banner name"
+                />
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Image Text
+                </label>
+                <input
+                  type="text"
+                  value={bannerDetails[index]?.text || ""}
+                  onChange={(e) =>
+                    handleDetailChange(index, "text", e.target.value)
+                  }
+                  className="mt-1 w-full border border-gray-300 rounded-md p-2 focus:ring-primary-500 focus:border-primary-500"
+                  placeholder="Enter image text"
+                />
+              </div>
             </div>
-
-            <div className="form-group mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Image Alt Text <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                value={imageAltText}
-                onChange={(e) => setImageAltText(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
-                placeholder="Enter Alt Text"
-                required
-              />
-            </div>
-
-            <div className="form-group mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Brand Logo <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-white hover:file:bg-primary-dark-500"
-              />
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center">
-            <div className="w-full h-40 md:h-56 border-dashed border-2 border-gray-300 rounded-md flex items-center justify-center bg-gray-50">
-              <img
-                className="h-full object-contain"
-                alt="Brand Preview"
-                src={
-                  preview ||
-                  "https://via.placeholder.com/500x500?text=Brand+Logo+Placeholder"
-                }
-              />
-            </div>
+          ))}
+          {/* Add New Banner Box */}
+          <div
+            className="relative border border-dashed border-gray-300 rounded-md flex items-center justify-center bg-gray-50 h-40 cursor-pointer"
+            onClick={() =>
+              document.getElementById(`banner-input-${previews.length}`).click()
+            }
+          >
+            <span className="text-gray-500">+ Add Banner</span>
+            <input
+              type="file"
+              id={`banner-input-${previews.length}`}
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => handleBannerChange(e, previews.length)}
+            />
           </div>
         </div>
 
         <div className="mt-6 flex justify-between items-center">
           <button
             type="button"
-            className="px-4 py-2 bg-primary-500 hover:bg-primary-dark-500 text-gray-700 rounded-md"
-            style={{ color: "white" }}
-            onClick={() => navigate(-1)} // Navigate back to the previous page
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
+            onClick={() => navigate(-1)}
           >
             Back
           </button>
-          <div className="flex gap-3">
-            <button
-              type="reset"
-              className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-md"
-              onClick={() => setPreview(null)}
-            >
-              Reset
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-primary-500 hover:bg-primary-dark-500 text-white rounded-md"
-              style={{ color: "white" }}
-            >
-              Submit
-            </button>
-          </div>
+          <button
+            type="submit"
+            className="px-4 py-2 bg-primary-500 hover:bg-primary-dark-500 text-white rounded-md"
+          >
+            Submit
+          </button>
         </div>
       </form>
     </div>
   );
 };
 
-export default AddBrandForm;
+export default AddBannerForm;
+
+
 
