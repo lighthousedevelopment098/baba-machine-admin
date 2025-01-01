@@ -131,11 +131,11 @@ const VendorTable = memo(({ onDeleteVendor, vendors, pagenations }) => {
             exportFileName="vendors"
             headerActions={
               <>
-                <ActionButton
+                {/* <ActionButton
                   to="/addvenderform"
                   className="px-4 py-2 rounded-md"
                   label="Add Vendor"
-                />
+                /> */}
               </>
             }
           />

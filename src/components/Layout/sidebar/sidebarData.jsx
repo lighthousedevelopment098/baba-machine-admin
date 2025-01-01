@@ -93,13 +93,13 @@ export const sidebarItems = [
   },
 
   {
-    title: "Brand",
+    title: "News",
     icon: <FaStar />,
     key: "brand",
 
     isDropdown: true,
     subItems: [
-      { title: "Add New", link: "/addnewbrand" },
+      { title: "Add News", link: "/addnewbrand" },
       { title: "List", link: "/brandlist" },
     ],
   },
@@ -112,31 +112,31 @@ export const sidebarItems = [
   //   isDropdown: false,
   // },
   {
-    title: "In-house Products",
+    title: "Services",
     key: "inhouse-product",
 
     icon: <FaWarehouse />,
     isDropdown: true,
     subItems: [
-      { title: "Product List", link: "/inhouseproductlist" },
-      { title: "Add New Product", link: "/inhouseaddproduct" },
-      { title: "Bulk Import", link: "/bulkimport" },
+      { title: "Services List", link: "/inhouseproductlist" },
+      { title: "Add New Services", link: "/inhouseaddproduct" },
+      // { title: "Bulk Import", link: "/bulkimport" },
     ],
   },
 
-  // {
-  //   title: "Vendor",
-  //   key: "vendor-management",
-  //   SubHeading: "Vendors management",
-  //   icon: <FaWallet />,
-  //   isDropdown: true,
-  //   subItems: [
-  //     { title: "Vendor List", link: "/venderlist" },
-  //     { title: "Add Vendor", link: "/addvenderform" },
-  //     { title: "Vendor Withdraw", link: "/addvenderwallet" },
-  //     // { title: "Vendor Wallet Method", link: "/addvenderwalletmethod" },
-  //   ],
-  // },
+  {
+    title: "Vendor",
+    key: "vendor-management",
+    SubHeading: "Vendors management",
+    icon: <FaWallet />,
+    isDropdown: true,
+    subItems: [
+      { title: "Vendor List", link: "/venderlist" },
+      // { title: "Add Vendor", link: "/addvenderform" },
+      // { title: "Vendor Withdraw", link: "/addvenderwallet" },
+      // { title: "Vendor Wallet Method", link: "/addvenderwalletmethod" },
+    ],
+  },
   // {
   //   title: "Vendor Products",
   //   key:"vendor-product",
@@ -204,31 +204,32 @@ export const sidebarItems = [
   //   isDropdown: false,
   // },
 
-  // {
-  //   title: "Help and Support",
+  {
+    title: "Help and Support",
+    key:"Help_and_Support",
 
-  //   isDropdown: true,
-  //   icon: <MdHealthAndSafety />,
-  //   subItems: [
-  //     {
-  //       title: "Inbox",
-  //       key:"inbox",
-  //       icon: <CiInboxOut />,
-  //       link: "/indexmessage",
-  //     },
-  //     {
-  //       title: "Messages",
-  //       key:"message",
-  //       icon: <FaMessage />,
-  //       link: "/messagesupport",
-  //     },
+    isDropdown: true,
+    icon: <MdHealthAndSafety />,
+    subItems: [
+      {
+        title: "Inbox",
+        key:"inbox",
+        icon: <CiInboxOut />,
+        link: "/indexmessage",
+      },
+      {
+        title: "Messages",
+        key:"message",
+        icon: <FaMessage />,
+        link: "/messagesupport",
+      },
   //     // {
   //     //   title: "Support Ticket",
   //     //   icon: <FaHeadset />,
   //     //   link: "/ticketsupport",
   //     // },
-  //   ],
-  // },
+    ],
+  },
 
   // {
 

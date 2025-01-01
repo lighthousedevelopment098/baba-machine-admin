@@ -30,11 +30,7 @@ const CategoryList = React.memo(
           ),
         },
         { key: "name", label: "Category Name" },
-        {
-          key: "priority",
-          label: "Priority",
-          render: (item) => item?.priority || "0",
-        },
+  
         {
           key: "product",
           label: "Products",
