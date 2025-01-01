@@ -516,6 +516,7 @@ const AddNewProduct = () => {
           <button
             type="submit"
             className="bg-primary-500 hover:bg-primary-dark-500 text-white px-6 py-2 rounded shadow"
+            style={{color:"white"}}
             disabled={loading}
           >
             {loading ? "Submitting..." : "Submit Service"}

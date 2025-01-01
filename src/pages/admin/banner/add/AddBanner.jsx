@@ -557,6 +557,7 @@ const AddBannerForm = () => {
           <button
             type="submit"
             className="px-4 py-2 bg-primary-500 hover:bg-primary-dark-500 text-white rounded-md"
+            style={{color:"white"}}
           >
             Submit
           </button>
