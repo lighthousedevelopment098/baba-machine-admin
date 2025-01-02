@@ -123,8 +123,8 @@ import UpdateEmployee from "./pages/admin/employees/add/updateEmploye.jsx";
 import UpdateVendor from "./pages/seller/vendor/add/addVender/UpdateVendor.jsx";
 import UpdateEmployeeRole from "./pages/admin/employees/add/updateEmployeRole.jsx";
 import VendorWalletDetail from "./pages/seller/vendor/list/VenderWallet/VendorWalletDetail.jsx";
-import AddPickupAddress from "./components/SonicShipping/AddPickupAddress.jsx";
 import ManufacturingForm from "./components/Manufacture/AddManufacturing.jsx";
+import Manufacturers from "./pages/manufacture/list/manufacturers.jsx";
 
 
 function AllRoutes() {
@@ -144,7 +144,6 @@ function AllRoutes() {
 
         <Route path="/" element={<Dashboard />} />
     
-        <Route path="/addpickupaddress" element={<AddPickupAddress />} />
 
         <Route path="/allorders" element={<OrderList />} />
         <Route path="/orderdetail/:id" element={<OrderDetails />} />
@@ -164,7 +163,7 @@ function AllRoutes() {
         <Route path="/inhouseaddproduct" element={<AddInHouseNewProduct />} />
         <Route path="/categories" element={<Categories />} />
         <Route path="/categoryedit/:id" element={<CategoryUpdate />} />
-        <Route path="/subcategories" element={<SubCategoriess />} />
+        <Route path="/manufacturers" element={<Manufacturers/>} />
         <Route path="/subsubcategories" element={<Sub_Sub_Categories />} />
         <Route path="/addnewbrand" element={<AddNewBrand />} />
         <Route path="/brandlist" element={<BrandList />} />

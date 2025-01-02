@@ -48,36 +48,7 @@ export const sidebarItems = [
     link: "/",
     isDropdown: false,
   },
-  // {
-  //   key: "order-management",
-  //   title: "Orders",
-  //   SubHeading: "Order management",
-  //   icon: <IoCartSharp />,
-  //   isDropdown: true,
-  //   subItems: [
-  //     { title: "All Orders", link: "/allorders" },
-  //     { title: "Pending Orders", link: "/pendingorder" },
-  //     { title: "Confirmed Orders", link: "/confirmedorder" },
-  //     { title: "Packaging Orders", link: "/packagingorder" },
-  //     { title: "Out for Delivery", link: "/outfordelivery" },
-  //     { title: "Delivered Orders", link: "/deliveredorder" },
-  //     { title: "Returned Orders", link: "/returnedorder" },
-  //     { title: "Failed to Deliver", link: "/failedorder" },
-  //     { title: "Canceled", link: "/cancel" },
-  //   ],
-  // },
-  // {
-  //   key: "refund-management",
-  //   title: "Refund Requests",
-  //   icon: <CgNotes />,
-  //   isDropdown: true,
-  //   subItems: [
-  //     { title: "Pending Requests", link: "/pendingrefundrequests" },
-  //     { title: "Approved Requests", link: "/approverefundrequests" },
-  //     { title: "Refunded", link: "/refunded" },
-  //     { title: "Rejected", link: "/rejected" },
-  //   ],
-  // },
+  
 
   {
     title: "Categories Setup",
@@ -87,8 +58,7 @@ export const sidebarItems = [
     isDropdown: true,
     subItems: [
       { title: "Categories", link: "/categories" },
-      { title: "Subcategories", link: "/subcategories" },
-      { title: "Sub Subcategories", link: "/subsubcategories" },
+      { title: "Manufacturers", link: "/manufacturers" },
     ],
   },
 

@@ -16,6 +16,7 @@ import couponReducer from './slices/admin/couponSlice';
 import flashDealReducer from './slices/admin/flashDealSlice'; 
 import attributeReducer from './slices/admin/attributeSlice'; 
 import subscriberReducer from './slices/admin/subscriberSlice'; 
+import manufacturersReducer from './slices/admin/manufacturersSlice'; 
 
 const store = configureStore({
   reducer: {
@@ -36,6 +37,7 @@ const store = configureStore({
     flashDeals: flashDealReducer,
     attribute: attributeReducer,
     subscriber: subscriberReducer,  // subscriber slice
+    manufacturers: manufacturersReducer,  // subscriber slice
 
 
   },

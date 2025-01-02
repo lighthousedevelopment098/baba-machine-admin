@@ -1,9 +1,8 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaAngleDown, FaAngleUp } from "react-icons/fa";
 import { sidebarItems as allSidebarItems } from "./sideBarData";
 import { BsDot } from "react-icons/bs";
-import { getAuthData } from "../../../utils/authHelper"; // Import function to get token
 
 // Function to format module names for display
 const formatModuleName = (moduleName) => {
@@ -18,36 +17,19 @@ const Sidebar = ({ toggleSidebar }) => {
   const [sidebarItems, setSidebarItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Memoize the user data
-  const { token, user } = useMemo(() => getAuthData(), []); // Empty array to ensure it only runs once
-
   useEffect(() => {
-    if (!user || !user.role || !user.role.modules) return;
-    // console.log("User modules:", user.role.modules);
-    // console.log("Sidebar item keys:", allSidebarItems.map(item => item.key));
-
-    const role = user.role.name || "admin";
-
-    // Filter items based on user modules
-    const filteredItems = allSidebarItems.filter(
-      (item) => item.key && user.role.modules.includes(item.key)
-    );
-
-    // Format titles and set state
-    const formattedItems = filteredItems.map((item) => ({
+    // No filtering based on user role now, just set all items
+    const formattedItems = allSidebarItems.map((item) => ({
       ...item,
       title: formatModuleName(item.key),
     }));
-
-    // console.log("Filtered Items:", formattedItems);
     setSidebarItems(formattedItems);
-  }, [user]);
+  }, []);
 
   const toggleDropdown = (index) => {
     setActiveDropdown(activeDropdown === index ? null : index);
   };
 
-  // console.log("sidebar itemss====", sidebarItems)
   // Filtering sidebar items based on search term
   const filteredSidebarItems = sidebarItems.filter((item) => {
     const searchQuery = searchTerm.toLowerCase();

@@ -1,8 +1,8 @@
 import React, { useState, useCallback, useRef } from "react";
 import { MdDeleteOutline } from "react-icons/md";
 
-const CategoryForm = ({
-  newCategory,
+const AddManufacturers = ({
+  newManufacturer,
   onInputChange,
   onSubmit,
   setSelectedFile,
@@ -45,12 +45,12 @@ const CategoryForm = ({
 
   return (
     <div className="card p-6 shadow-lg rounded-md bg-white">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New Category</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">Add Manufacture</h2>
       <form onSubmit={onSubmit}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Category Name
+              Manufacture Name
             </label>
             <input
               type="text"
@@ -58,7 +58,7 @@ const CategoryForm = ({
               className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
               placeholder="Enter category name"
               required
-              value={newCategory.name}
+              value={newManufacturer.name}
               onChange={onInputChange}
             />
           </div>
@@ -115,4 +115,4 @@ const CategoryForm = ({
   );
 };
 
-export default React.memo(CategoryForm);
+export default React.memo(AddManufacturers);

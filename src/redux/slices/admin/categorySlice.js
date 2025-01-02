@@ -1,20 +1,14 @@
-import axiosInstance from '../../../utils/axiosConfig'; // Import axiosInstance with interceptors
-import apiConfig from '../../../config/apiConfig'; // Import apiConfig for API URLs
-import { ErrorMessage } from '../../../utils/ErrorMessage'; // Import ErrorMessage utility
-import { getAuthData } from '../../../utils/authHelper'; // Correctly import getAuthData
-
+import axios from 'axios';
+import { API_URL } from '../../../config/apiConfig';
+import axiosInstance from '../../../utils/axiosConfig'; 
+import { ErrorMessage } from '../../../utils/ErrorMessage';  
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-
-// Use the admin endpoint for categories
-const API_URL = `${apiConfig.admin}/categories`; //  to use admin role
 
 // Helper function to make API calls with authorization
 const makeAuthorizedRequest = async (method, url, data = null, params = null) => {
-  const { token } = getAuthData(); // Use getAuthData to retrieve token
   const config = {
     headers: {
-      Authorization: `Bearer ${token}`, // Use token in headers
-      'Content-Type': 'application/json', // or 'multipart/form-data' for file uploads
+      'Content-Type': 'multipart/form-data',
     },
     params,
   };
@@ -31,10 +25,10 @@ export const fetchCategories = createAsyncThunk(
   'productCategory/fetchCategories',
   async (searchParams, { rejectWithValue }) => {
     try {
-      const response = await makeAuthorizedRequest('get', API_URL, null, searchParams);
-      return response.data.doc;
+      const response = await makeAuthorizedRequest('get', `${API_URL}/api/categories`, null, searchParams);
+      return response.data.data; 
     } catch (error) {
-      return rejectWithValue(ErrorMessage(error)); // Use ErrorMessage here
+      return rejectWithValue(ErrorMessage(error));
     }
   }
 );
@@ -44,10 +38,10 @@ export const fetchCategoryById = createAsyncThunk(
   'productCategory/fetchCategoryById',
   async (categoryId, { rejectWithValue }) => {
     try {
-      const response = await makeAuthorizedRequest('get', `${API_URL}/${categoryId}`);
-      return response.data.doc;
+      const response = await makeAuthorizedRequest('get', `${API_URL}/api/categories/${categoryId}`);
+      return response.data.data;
     } catch (error) {
-      return rejectWithValue(ErrorMessage(error)); // Use ErrorMessage here
+      return rejectWithValue(ErrorMessage(error));
     }
   }
 );
@@ -57,11 +51,17 @@ export const createCategory = createAsyncThunk(
   'productCategory/createCategory',
   async (categoryData, { rejectWithValue }) => {
     try {
-      console.log("categroy data slice", categoryData)
-      const response = await makeAuthorizedRequest('post', API_URL, categoryData);
-      return response.data.doc;
+      const formData = new FormData();
+      for (const key in categoryData) {
+        formData.append(key, categoryData[key]);
+      }
+      console.log("categoryData", formData)
+      const response = await axios.post(`${API_URL}/api/categories`, formData);
+
+      // const response = await axios.post(`${API_URL}/api/categories`, categoryData);
+      return response.data.data;
     } catch (error) {
-      return rejectWithValue(ErrorMessage(error)); // Use ErrorMessage here
+      return rejectWithValue(ErrorMessage(error));
     }
   }
 );
@@ -76,23 +76,10 @@ export const updateCategory = createAsyncThunk(
         formData.append(key, categoryData[key]);
       }
 
-      const response = await makeAuthorizedRequest('put', `${API_URL}/${categoryId}`, formData);
-      return response.data.doc;
+      const response = await axios.put(`${API_URL}/api/categories/${categoryId}`, formData);
+      return response.data.data;
     } catch (error) {
-      return rejectWithValue(ErrorMessage(error)); // Use ErrorMessage here
-    }
-  }
-);
-
-// Update category status
-export const updateCategoryStatus = createAsyncThunk(
-  'productCategory/updateCategoryStatus',
-  async ({ categoryId, status }, { rejectWithValue }) => {
-    try {
-      const response = await makeAuthorizedRequest('put', `${API_URL}/${categoryId}/status`, { status });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(ErrorMessage(error)); // Use ErrorMessage here
+      return rejectWithValue(ErrorMessage(error));
     }
   }
 );
@@ -102,10 +89,10 @@ export const deleteCategory = createAsyncThunk(
   'productCategory/deleteCategory',
   async (categoryId, { rejectWithValue }) => {
     try {
-      await makeAuthorizedRequest('delete', `${API_URL}/${categoryId}`);
+      await makeAuthorizedRequest('delete', `${API_URL}/api/categories/${categoryId}`);
       return categoryId;
     } catch (error) {
-      return rejectWithValue(ErrorMessage(error)); // Use ErrorMessage here
+      return rejectWithValue(ErrorMessage(error));
     }
   }
 );
@@ -172,23 +159,6 @@ const productCategorySlice = createSlice({
         }
       })
       .addCase(updateCategory.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || action.error.message;
-      })
-      .addCase(updateCategoryStatus.pending, (state) => {
-        state.loading = true;
-      })
-      .addCase(updateCategoryStatus.fulfilled, (state, action) => {
-        state.loading = false;
-        const updatedCategory = action.payload;
-        state.categories = state.categories.map((c) =>
-          c._id === updatedCategory._id ? updatedCategory : c
-        );
-        if (state.currentCategory && state.currentCategory._id === updatedCategory._id) {
-          state.currentCategory = updatedCategory;
-        }
-      })
-      .addCase(updateCategoryStatus.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || action.error.message;
       })

@@ -21,6 +21,7 @@ import ResetPassword from "./components/ForgetPassword/ResetPassword.jsx";
 import { ColorScheam } from "./utils/ColorScheam.js";
 import ForgotPasswordViaPhone from "./components/ForgetPassword/ForgotPasswordViaPhone.jsx";
 import { getAuthData } from "./utils/authHelper.js";
+import { ToastContainer } from "react-toastify";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -49,18 +50,6 @@ function App() {
     setLoading(false); // Finished loading
   }, []);
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token");
-  //   if (token) {
-  //     setIsLoggedIn(true);
-  //     const storedUser = JSON.parse(localStorage.getItem("user"));
-  //     setUser(storedUser); // Set user data from local storage
-  //   }
-  //   setLoading(false);
-  // }, []);
-
-
-
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -84,6 +73,7 @@ function App() {
           {isLoggedIn ? (
             <>
               <Header user={user} handleLogout={handleLogout} />
+              <ToastContainer />
 
               <div className="flex flex-1">
                 <div

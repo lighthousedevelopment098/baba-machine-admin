@@ -1,5 +1,6 @@
 
 
+export const API_URL = import.meta.env.VITE_API_URL;
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 const BUCKET_URL = import.meta.env.VITE_BUCKET_URL;
 
